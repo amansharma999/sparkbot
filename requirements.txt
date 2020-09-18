@@ -4,4 +4,4 @@ requests
 time
 bs4
 lxml
-functools
+
