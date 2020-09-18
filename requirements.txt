@@ -1,1 +1,7 @@
+telegram
 python-telegram-bot
+requests
+time
+bs4
+lxml
+functools
