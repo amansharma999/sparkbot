@@ -1,6 +1,22 @@
-#made by @xcruzhd2
+
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# This program is dedicated to the public domain under the CC0 license.
+
+"""
+First, a few callback functions are defined. Then, those functions are passed to
+the Dispatcher and registered at their respective places.
+Then, the bot is started and runs until we press Ctrl-C on the command line.
+
+Usage:
+Example of a bot-user conversation using ConversationHandler.
+Send /start to initiate the conversation.
+Press Ctrl-C on the command line or send a signal to the process to stop the
+bot.
+"""
 
 import logging
+import os
 #import telegram
 from telegram import ChatAction
 import requests
@@ -55,6 +71,7 @@ def start(update, context):
 
     return ConversationHandler.END
 
+#@send_typing_action
 @send_action(ChatAction.TYPING)
 def Key(update, context):
     user = update.message.from_user
@@ -64,6 +81,15 @@ def Key(update, context):
     
     update.message.reply_text('You can contact these resellers to buy your key')
     
+def remove(filename):
+	if os.path.exists(filename):
+		os.remove(filename)
+		print(filename ,"delete successfully")
+	else:
+		print("file not found")
+
+
+
 
 @send_action(ChatAction.UPLOAD_DOCUMENT)
 def Download(update, context):
@@ -72,7 +98,8 @@ def Download(update, context):
     #photo_file.download('user_photo.jpg')
     logger.info(" %s: downloaded latest apk", user.first_name )
     x = update.message.reply_text('Downloading.')
-   #x= context.bot.send_message(text="Downloading.", chat_id=update.message.chat_id)
+#    x= context.bot.send_message(text="Downloading.", chat_id=update.message.chat_id)
+   # time.sleep(1)
     context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
     context.bot.editMessageText(text='Downloading..', message_id = x.message_id, chat_id=update.message.chat_id)
    
@@ -85,9 +112,11 @@ def Download(update, context):
     context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
     with open(apk_name+str(version)+ext, 'wb') as e  :
     	e.write(file.content)
+    #time.sleep(1)
     context.bot.editMessageText(text='Download successfull\nuploading now.', message_id = x.message_id, chat_id=update.message.chat_id)
     context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
     context.bot.send_document(chat_id=update.message.chat_id, document=open(apk_name+str(version)+ext, 'rb'))
+    remove(apk_name+str(version)+ext)
    # update.message.send_document(chat_id=update.message.chat_id, document=open(apk_name+str(version)+ext, 'rb'))
    # update.message.reply_text('Not Defined')
 
@@ -95,6 +124,7 @@ def Download(update, context):
 @send_action(ChatAction.TYPING)
 def Status(update, context):
     user = update.message.from_user
+#    user_location = update.message.location
     logger.info("%s selected  ESP STATUS", user.first_name)
     
     url=requests.get(url1)
@@ -152,4 +182,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-			
