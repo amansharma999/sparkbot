@@ -161,6 +161,7 @@ def main():
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
     updater = Updater(TOKEN , use_context=True)
+    print("Bot started successfully")
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
