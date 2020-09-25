@@ -12,10 +12,10 @@ import os
 from telegram import ChatAction
 import requests
 import time
-import requests
 from bs4 import BeautifulSoup
 import lxml
 from functools import wraps
+from telegram.ext.dispatcher import run_async
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove,InlineKeyboardMarkup, InlineKeyboardButton)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler,CallbackQueryHandler)
@@ -49,6 +49,7 @@ def send_action(action):
     
     
 #Function to handle /start command
+@run_async
 def start(update, context):
     reply_keyboard = [['Buy Key', 'Download Latest Loader'],['Live ESP Status','Report Problem']]
 
@@ -61,24 +62,29 @@ def start(update, context):
     return ConversationHandler.END
 
 #when user clicks on Buy Key button
+#@run_async
 @send_action(ChatAction.TYPING)
+@run_async
 def Key(update, context):
     user = update.message.from_user
     logger.info(" %s choosed  %s option", user.first_name, update.message.text)
     context.bot.forwardMessage(chat_id=update.message.chat_id,from_chat_id="-1001424216963",message_id="1787")
     update.message.reply_text('You can contact these resellers to buy your key')
 #Deletes sparkcheats apk from storage    
-def remove(filename):
-	if os.path.exists(filename):
-		os.remove(filename)
-		print(filename ,"delete successfully")
-	else:
-		print("file not found")
+
+#def remove(filename):
+#	if os.path.exists(filename):
+#		os.remove(filename)
+#		print(filename ,"delete successfully")
+#	else:
+#		print("file not found")
 
 
 
 #Download sparkcheats apk
+
 @send_action(ChatAction.UPLOAD_DOCUMENT)
+@run_async
 def Download(update, context):
     user = update.message.from_user
     logger.info(" %s: downloaded latest apk", user.first_name )
@@ -97,9 +103,17 @@ def Download(update, context):
     context.bot.editMessageText(text='Download successfull\nuploading now.', message_id = x.message_id, chat_id=update.message.chat_id)
     context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
     context.bot.send_document(chat_id=update.message.chat_id, document=open(apk_name+str(version)+ext, 'rb'))
-    remove(apk_name+str(version)+ext)
+    filename = apk_name+str(version)+ext
+    #remove(apk_name+str(version)+ext)
+    if os.path.exists(filename):
+	    os.remove(filename)
+	    print(filename ,"delete successfully")
+    else:
+	    print("file not found")
  #when user clicks on ESP Status button
+#@run_async
 @send_action(ChatAction.TYPING)
+@run_async
 def Status(update, context):
     user = update.message.from_user
     logger.info("%s selected  ESP STATUS", user.first_name)
@@ -112,7 +126,9 @@ def Status(update, context):
     status2=nextsibling.text[33:]
     update.message.reply_text(f"{version1}\n{status1}\n\n{version2}\n{status2}")
 #cancel the conversation
+#@run_async
 @send_action(ChatAction.TYPING)
+@run_async
 def cancel(update, context):
     user = update.message.from_user
     logger.info("User %s canceled the conversation.", user.first_name)
@@ -120,7 +136,9 @@ def cancel(update, context):
                               #reply_markup=ReplyKeyboardRemove())
     return ConversationHandler.END
 #First level conversations starts here-------#
+#@run_async
 @send_action(ChatAction.TYPING)
+@run_async
 def Report(update, context):
     user = update.message.from_user
     logger.info("User %s started the conversation.", user.first_name)
@@ -139,7 +157,9 @@ def Report(update, context):
     
 #second level conversations---------#
 #when user selects global option
+#@run_async
 @send_action(ChatAction.TYPING)
+@run_async
 def Pglobal(update, context):
     user = update.callback_query.from_user
     fname = user.first_name
@@ -162,7 +182,9 @@ def Pglobal(update, context):
     )
     return Second  
 #when user selects kr option    
+#@run_async
 @send_action(ChatAction.TYPING)   
+@run_async
 def Pkr(update, context):
     user = update.callback_query.from_user
     fname = user.first_name
@@ -184,7 +206,9 @@ def Pkr(update, context):
     )
     return Second
 #when user selects Tw option
+#@run_async
 @send_action(ChatAction.TYPING)
+@run_async
 def Ptw(update, context):
     user = update.callback_query.from_user
     fname = user.first_name
@@ -207,7 +231,9 @@ def Ptw(update, context):
     )
     return Second
 #when user selects Vn option
+#@run_async
 @send_action(ChatAction.TYPING)
+@run_async
 def Pvn(update, context):
     user = update.callback_query.from_user
     fname = user.first_name
@@ -230,7 +256,9 @@ def Pvn(update, context):
     return Second
 #Third level conversations---------------#
 #when user sects 32bit option
+#@run_async
 @send_action(ChatAction.TYPING)
+@run_async
 def Bit_32(update, context):
     user = update.callback_query.from_user
     fname = user.first_name
@@ -247,7 +275,9 @@ def Bit_32(update, context):
     
     return Third   
 #when user selects 64 bit option
+#@run_async
 @send_action(ChatAction.TYPING)    
+@run_async
 def Bit_64(update, context):
     user = update.callback_query.from_user
     fname = user.first_name
@@ -265,7 +295,9 @@ def Bit_64(update, context):
     return Third       
 #Third level Conversation   
 #saves and send user inputs to our specified group/channel
-@send_action(ChatAction.TYPING)              
+#@run_async
+@send_action(ChatAction.TYPING)      
+@run_async        
 def save_input(update, context):
     """Saves  and send input ."""
     for I in range(1):
@@ -274,6 +306,7 @@ def save_input(update, context):
     return True
 
 #main function
+#@run_async
 def main():
     updater = Updater(TOKEN , use_context=True)
     print("Bot started successfully")
