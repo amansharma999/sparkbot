@@ -37,6 +37,8 @@ url2 ='https://sparkcheats.tech/download'
 apk_name ='SparkLoader'
 ext='.apk'
 TOKEN="1129141206:AAE64a9Msk0lKoDG3qSUcpckOzpMx8F7SN4"
+#keyboard
+reply_keyboard = [['Buy Key', 'Download Latest Loader'],['Live ESP Status','Report Problem']]
 #Decorator function for sending chat actions while processing func commands
 def send_action(action):
     def decorator(func):
@@ -51,7 +53,7 @@ def send_action(action):
 #Function to handle /start command
 @run_async
 def start(update, context):
-    reply_keyboard = [['Buy Key', 'Download Latest Loader'],['Live ESP Status','Report Problem']]
+#    reply_keyboard = [['Buy Key', 'Download Latest Loader'],['Live ESP Status','Report Problem']]
 
     update.message.reply_text(
         'Hi! My name is Sparky Bot.\n'
@@ -83,14 +85,15 @@ def Key(update, context):
 
 #Download sparkcheats apk
 
-@send_action(ChatAction.UPLOAD_DOCUMENT)
+@send_action(ChatAction.TYPING)
 @run_async
 def Download(update, context):
     user = update.message.from_user
     logger.info(" %s: downloaded latest apk", user.first_name )
-    x = update.message.reply_text('Downloading.')
+    reply_markup=ReplyKeyboardRemove()
+    x = update.message.reply_text('Downloading.' )#, reply_markup = reply_markup)
     context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
-    context.bot.editMessageText(text='Downloading..', message_id = x.message_id, chat_id=update.message.chat_id)
+    context.bot.editMessageText(text='Downloading..', message_id = x.message_id, chat_id=update.message.chat_id)#, reply_markup= reply_markup)
     context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
     file = requests.get(url2)
     url = requests.get(url1)
@@ -102,7 +105,7 @@ def Download(update, context):
     	e.write(file.content)
     context.bot.editMessageText(text='Download successfull\nuploading now.', message_id = x.message_id, chat_id=update.message.chat_id)
     context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
-    context.bot.send_document(chat_id=update.message.chat_id, document=open(apk_name+str(version)+ext, 'rb'))
+    context.bot.send_document(chat_id=update.message.chat_id, document=open(apk_name+str(version)+ext, 'rb'), reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
     filename = apk_name+str(version)+ext
     #remove(apk_name+str(version)+ext)
     if os.path.exists(filename):
@@ -124,7 +127,10 @@ def Status(update, context):
     nextsibling=soup.p.nextSibling
     version2=nextsibling.text[:31]
     status2=nextsibling.text[33:]
-    update.message.reply_text(f"{version1}\n{status1}\n\n{version2}\n{status2}")
+    time = soup.text[283:333]
+    time1 = time[:15]
+    time2 =time[15:]
+    update.message.reply_text(f"{version1}\n{status1}\n\n{version2}\n{status2}\n{time1}\n{time2}")
 #cancel the conversation
 #@run_async
 @send_action(ChatAction.TYPING)
