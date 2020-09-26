@@ -124,13 +124,13 @@ def Status(update, context):
     soup = BeautifulSoup(url.text , 'lxml')
     version1=soup.p.text[:32]
     status1=str(soup.p.text[33:])
-    nextsibling=soup.p.nextSibling
-    version2=nextsibling.text[:31]
-    status2=nextsibling.text[33:]
+    #nextsibling=soup.p.nextSibling
+    #version2=nextsibling.text[:31]
+    #status2=nextsibling.text[33:]
     time = soup.text[283:333]
     time1 = time[:15]
     time2 =time[15:]
-    update.message.reply_text(f"{version1}\n{status1}\n\n{version2}\n{status2}\n{time1}\n{time2}")
+    update.message.reply_text(f"{version1}\n{status1}\n\n{time1}\n{time2}")
 #cancel the conversation
 #@run_async
 @send_action(ChatAction.TYPING)
