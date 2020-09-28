@@ -60,7 +60,7 @@ def start(update, context):
         'How may i help you ?\n\n\n'
         'Send /cancel to stop our conversation.\n'
         ,
-        reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+        reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard = True))
     return ConversationHandler.END
 
 #when user clicks on Buy Key button
