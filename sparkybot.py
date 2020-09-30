@@ -85,32 +85,38 @@ def Key(update, context):
 #		print("file not found")
 
 
-# Download sparkcheats apk
+# Download+remove sparkcheats apk
 
 @send_action(ChatAction.TYPING)
 @run_async
 def Download(update, context):
     user = update.message.from_user
+    reply_keyboard = [['Buy Key', 'Download Latest Loader'], ['Live ESP Status', 'Report Problem']]
     logger.info(" %s: downloaded latest apk", user.first_name)
-    reply_markup = ReplyKeyboardRemove()
-    x = update.message.reply_text('Downloading.')  # , reply_markup = reply_markup)
-    context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
-    context.bot.editMessageText(text='Downloading..', message_id=x.message_id,
-                                chat_id=update.message.chat_id)  # , reply_markup= reply_markup)
+    #reply_markup = ReplyKeyboardRemove()
+
+    x = update.message.reply_text(text='Downloading please wait')#,reply_markup = ReplyKeyboardRemove(reply_keyboard))
     context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
     file = requests.get(url2)
     url = requests.get(url1)
+    #x.edit_text('Downloading..')
     soup = BeautifulSoup(url.text, 'lxml')
     version = soup.a.text[15:]
-    context.bot.editMessageText(text='Downloading...', message_id=x.message_id, chat_id=update.message.chat_id)
+    #x.edit_text('Downloading...')
     context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
     with open(apk_name + str(version) + ext, 'wb') as e:
         e.write(file.content)
-    context.bot.editMessageText(text='Download successfull\nuploading now.', message_id=x.message_id,
-                                chat_id=update.message.chat_id)
+    x.edit_text('Download successfull\nuploading now.')
     context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
-    context.bot.send_document(chat_id=update.message.chat_id, document=open(apk_name + str(version) + ext, 'rb'),
-                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True,resize_keyboard=True))
+    try:
+        context.bot.send_document(chat_id=update.message.chat_id, document=open(apk_name + str(version) + ext, 'rb'),
+                                  reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True,
+                                                                   resize_keyboard=True))
+    except Exception as e:
+        print(e)
+        x.edit_text('Uploading failed.\n\nMy devs has been informed.\nPlease try after sometime')
+        context.bot.sendMessage(chat_id="-491388645",text=f"uploading failed for user {user.first_name} with usrname {user.username}")
+
     filename = apk_name + str(version) + ext
     # remove(apk_name+str(version)+ext)
     if os.path.exists(filename):
