@@ -35,6 +35,7 @@ ext = '.apk'
 TOKEN = "1129141206:AAE64a9Msk0lKoDG3qSUcpckOzpMx8F7SN4"
 # keyboard
 reply_keyboard = [['Buy Key', 'Download Latest Loader'], ['Live ESP Status', 'Report Problem']]
+file_id = ""
 
 
 # Decorator function for sending chat actions while processing func commands
@@ -74,7 +75,31 @@ def Key(update, context):
     context.bot.forwardMessage(chat_id=update.message.chat_id, from_chat_id="-1001424216963", message_id="1787")
     update.message.reply_text('You can contact these resellers to buy your key')
 
+def Latest(update, context):
+    context.bot.sendMessage(chat_id=update.message.chat_id,text="Okay Downloading")
+    file = requests.get(url2)
+    url = requests.get(url1)
+    soup = BeautifulSoup(url.text, 'lxml')
+    version = soup.a.text[15:]
+    with open(apk_name + str(version) + ext, 'wb') as e:
+        e.write(file.content)
+    try:
+        x = context.bot.send_document(chat_id=update.message.chat_id, document=open(apk_name + str(version) + ext, 'rb'))
+        global file_id
+        file_id = x.document.file_id
+    except Exception as e:
+        print(e)
+        x.edit_text('Uploading failed.\n\nMy devs has been informed.\nPlease try after sometime')
+        context.bot.sendMessage(chat_id="-491388645",
+                                text=f"uploading failed for user {user.first_name} with usrname {user.username}")
 
+    filename = apk_name + str(version) + ext
+    # remove(apk_name+str(version)+ext)
+    if os.path.exists(filename):
+        os.remove(filename)
+        print(filename, "deleted successfully")
+    else:
+        print("file not found")
 # Deletes sparkcheats apk from storage
 
 # def remove(filename):
@@ -97,19 +122,15 @@ def Download(update, context):
 
     x = update.message.reply_text(text='Downloading please wait')#,reply_markup = ReplyKeyboardRemove(reply_keyboard))
     context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
-    file = requests.get(url2)
-    url = requests.get(url1)
-    #x.edit_text('Downloading..')
-    soup = BeautifulSoup(url.text, 'lxml')
-    version = soup.a.text[15:]
-    #x.edit_text('Downloading...')
-    context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
-    with open(apk_name + str(version) + ext, 'wb') as e:
-        e.write(file.content)
+    # file = requests.get(url2)
+    # url = requests.get(url1)
+    # soup = BeautifulSoup(url.text, 'lxml')
+    # version = soup.a.text[15:]
+    # with open(apk_name + str(version) + ext, 'wb') as e:
+    #     e.write(file.content)
     x.edit_text('Download successfull\nuploading now.')
-    context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
     try:
-        context.bot.send_document(chat_id=update.message.chat_id, document=open(apk_name + str(version) + ext, 'rb'),
+        context.bot.send_document(chat_id=update.message.chat_id, document=file_id,
                                   reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True,
                                                                    resize_keyboard=True))
     except Exception as e:
@@ -117,13 +138,13 @@ def Download(update, context):
         x.edit_text('Uploading failed.\n\nMy devs has been informed.\nPlease try after sometime')
         context.bot.sendMessage(chat_id="-491388645",text=f"uploading failed for user {user.first_name} with usrname {user.username}")
 
-    filename = apk_name + str(version) + ext
-    # remove(apk_name+str(version)+ext)
-    if os.path.exists(filename):
-        os.remove(filename)
-        print(filename, "delete successfully")
-    else:
-        print("file not found")
+    # filename = apk_name + str(version) + ext
+    # # remove(apk_name+str(version)+ext)
+    # if os.path.exists(filename):
+    #     os.remove(filename)
+    #     print(filename, "delete successfully")
+    # else:
+    #     print("file not found")
 
 
 # when user clicks on ESP Status button
@@ -374,6 +395,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex('^(Live ESP Status)$'), Status))
     dp.add_handler(CommandHandler('cancel', cancel))
     dp.add_handler(conv_handler)
+    dp.add_handler(CommandHandler('latest',callback=Latest,filters= Filters.chat(-491388645)))
     # Start the Bot
     updater.start_polling()
     updater.idle()
