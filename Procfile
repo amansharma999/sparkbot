@@ -1,1 +1,1 @@
-worker: python3 xdarkbot.py
+worker: python3 sparkybot.py
