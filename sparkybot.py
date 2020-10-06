@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 from telegram import ChatAction
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
-                          ConversationHandler, CallbackQueryHandler)
+                          ConversationHandler, CallbackQueryHandler, PicklePersistence)
 from telegram.ext.dispatcher import run_async
 
 # Enable logging
@@ -37,7 +37,7 @@ TOKEN = "1129141206:AAE64a9Msk0lKoDG3qSUcpckOzpMx8F7SN4"
 reply_keyboard = [['Buy Key', 'Download Latest Loader'], ['Live ESP Status', 'Report Problem']]
 file_id = ""
 
-
+pp = PicklePersistence(filename='conversationbot',single_file= False)
 # Decorator function for sending chat actions while processing func commands
 def send_action(action):
     def decorator(func):
@@ -55,7 +55,17 @@ def send_action(action):
 @run_async
 def start(update, context):
     #    reply_keyboard = [['Buy Key', 'Download Latest Loader'],['Live ESP Status','Report Problem']]
-
+    data = context.user_data
+    print(data)
+   # user_id = update.message.from_user.id
+    chat_id = update.message.chat.id
+    print(chat_id)
+    data['user_id'] = chat_id
+    #print(data)
+    #print(pp.get_chat_data())
+  #  print(data.keys())
+    #print(user_id)
+    #context.bot.sendMessage(text='id grabbed' ,chat_id = chat_id)
     update.message.reply_text(
         'Hi! My name is Sparky Bot.\n'
         'How may i help you ?\n\n\n'
@@ -74,13 +84,17 @@ def Key(update, context):
     logger.info(" %s choosed  %s option", user.first_name, update.message.text)
     context.bot.forwardMessage(chat_id=update.message.chat_id, from_chat_id="-1001424216963", message_id="1787")
     update.message.reply_text('You can contact these resellers to buy your key')
-
+#@send_action(ChatAction.UPLOAD_DOCUMENT)
+@run_async
 def Latest(update, context):
-    context.bot.sendMessage(chat_id=update.message.chat_id,text="Okay Downloading")
+    user = update.message.from_user
+    context.bot.sendMessage(chat_id=update.message.chat_id,text="Okay Downloading Latest Loader")
+    context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
     file = requests.get(url2)
     url = requests.get(url1)
     soup = BeautifulSoup(url.text, 'lxml')
     version = soup.a.text[15:]
+    context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
     with open(apk_name + str(version) + ext, 'wb') as e:
         e.write(file.content)
     try:
@@ -89,9 +103,9 @@ def Latest(update, context):
         file_id = x.document.file_id
     except Exception as e:
         print(e)
-        x.edit_text('Uploading failed.\n\nMy devs has been informed.\nPlease try after sometime')
-        context.bot.sendMessage(chat_id="-491388645",
-                                text=f"uploading failed for user {user.first_name} with usrname {user.username}")
+        x.edit_text('Unable to Download Latest Loader 🥺.')
+       # context.bot.sendMessage(chat_id="-491388645",
+                                #text=f"uploading failed for user {user.first_name} with usrname {user.username}")
 
     filename = apk_name + str(version) + ext
     # remove(apk_name+str(version)+ext)
@@ -116,6 +130,14 @@ def Latest(update, context):
 @run_async
 def Download(update, context):
     user = update.message.from_user
+    fname = user.first_name
+    lname = user.last_name
+    uname = user.username
+    username = ""
+    if uname == None:
+    	username = None
+    else:
+    	username =f"@{uname}"
     reply_keyboard = [['Buy Key', 'Download Latest Loader'], ['Live ESP Status', 'Report Problem']]
     logger.info(" %s: downloaded latest apk", user.first_name)
     #reply_markup = ReplyKeyboardRemove()
@@ -136,7 +158,7 @@ def Download(update, context):
     except Exception as e:
         print(e)
         x.edit_text('Uploading failed.\n\nMy devs has been informed.\nPlease try after sometime')
-        context.bot.sendMessage(chat_id="-491388645",text=f"uploading failed for user {user.first_name} with usrname {user.username}")
+        context.bot.sendMessage(chat_id="-491388645",text=f"uploading failed 🥺🥺 \nName  : {user.first_name} \nusername : {username}")
 
     # filename = apk_name + str(version) + ext
     # # remove(apk_name+str(version)+ext)
@@ -211,8 +233,13 @@ def Pglobal(update, context):
     fname = user.first_name
     lname = user.last_name
     uname = user.username
+    username = ""
+    if uname == None:
+    	username = None
+    else:
+    	username =f"@{uname}"
     name = f"{fname} {lname}"
-    msg = f"Name : {name}\nusername : @{uname}\nchoosed PUBG Global "
+    msg = f"Name : {name}\nusername : {username}\nchoosed PUBG Global "
     context.bot.sendMessage(chat_id="-491388645", text=msg)
     query = update.callback_query
     query.answer()
@@ -238,8 +265,13 @@ def Pkr(update, context):
     fname = user.first_name
     lname = user.last_name
     uname = user.username
+    username = ""
+    if uname == None:
+    	username = None
+    else:
+    	username =f"@{uname}"
     name = f"{fname} {lname}"
-    msg = f"Name : {name}\nusername : @{uname}\nchoosed PUBG Kr"
+    msg = f"Name : {name}\nusername : {username}\nchoosed PUBG Kr"
     context.bot.sendMessage(chat_id="-491388645", text=msg)
     query = update.callback_query
     query.answer()
@@ -264,8 +296,13 @@ def Ptw(update, context):
     fname = user.first_name
     lname = user.last_name
     uname = user.username
+    username = ""
+    if uname == None:
+    	username = None
+    else:
+    	username =f"@{uname}"
     name = f"{fname} {lname}"
-    msg = f"Name : {name}\nusername : @{uname}\nchoosed PUBG Tw "
+    msg = f"Name : {name}\nusername : {username}\nchoosed PUBG Tw "
     context.bot.sendMessage(chat_id="-491388645", text=msg)
     query = update.callback_query
     query.answer()
@@ -291,8 +328,13 @@ def Pvn(update, context):
     fname = user.first_name
     lname = user.last_name
     uname = user.username
+    username = ""
+    if uname == None:
+    	username = None
+    else:
+    	username =f"@{uname}"
     name = f"{fname} {lname}"
-    msg = f"Name : {name}\nusername : @{uname}\nchoosed PUBG Vn"
+    msg = f"Name : {name}\nusername : {username}\nchoosed PUBG Vn"
     context.bot.sendMessage(chat_id="-491388645", text=msg)
     query = update.callback_query
     query.answer()
@@ -318,8 +360,13 @@ def Bit_32(update, context):
     fname = user.first_name
     lname = user.last_name
     uname = user.username
+    username = ""
+    if uname == None:
+    	username = None
+    else:
+    	username =f"@{uname}"
     name = f"{fname} {lname}"
-    msg = f"Name : {name}\nusername : @{uname}\nchoosed 32bit "
+    msg = f"Name : {name}\nusername : {username}\nchoosed 32bit "
     context.bot.sendMessage(chat_id="-491388645", text=msg)
     query = update.callback_query
     query.answer()
@@ -339,8 +386,14 @@ def Bit_64(update, context):
     fname = user.first_name
     lname = user.last_name
     uname = user.username
-    name = f"{fname} {lname}"
-    msg = f"Name : {name}\nusername : @{uname}\nchoosed 64bit "
+    username = ""
+    if uname == None:
+    	username = None
+    else:
+    	username =f"@{uname}"
+    	
+    name = f"{fname} {lname}"                                                                               
+    msg = f"Name : {name}\nusername : {username}\nchoosed 64bit "
     context.bot.sendMessage(chat_id="-491388645", text=msg)
     query = update.callback_query
     query.answer()
@@ -363,13 +416,28 @@ def save_input(update, context):
         update.message.reply_text("Thanks for reporting :)")
     return True
 
+@run_async
+def send(update , context):
+	message = update.message.reply_to_message.text
+	#update.message.reply_text(message)
+	for i in pp.get_chat_data():
+		context.bot.sendMessage(chat_id= i, text= message)
+@run_async		
+def broadcast(update, context):
+	message_id = update.message.reply_to_message.message_id	
+	update.message.reply_text("okay! broadcast started")
+	for i in pp.get_chat_data():
+		context.bot.forward_message(chat_id = i ,from_chat_id= update.message.chat_id, message_id = message_id)
 
 # main function
 # @run_async
 def main():
-    updater = Updater(TOKEN, use_context=True)
+    updater = Updater(TOKEN,persistence=pp, use_context=True)    
     print("Bot started successfully")
     print("By @xcruzhd2")
+    #print(pp.get_bot_data().keys())
+    #for i in (pp.get_chat_data()):
+	    #print(i)
     conv_handler = ConversationHandler(
         entry_points=[MessageHandler(Filters.regex('^(Report Problem)$'), Report)],
         states={
@@ -389,6 +457,7 @@ def main():
     # Getting the dispatcher to register handlers
     dp = updater.dispatcher
     # registering handlers
+    dp.add_handler(CommandHandler('broadcast', broadcast))
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(MessageHandler(Filters.regex('^(Buy Key)$'), Key))
     dp.add_handler(MessageHandler(Filters.regex('^(Download Latest Loader)$'), Download))
@@ -396,7 +465,8 @@ def main():
     dp.add_handler(CommandHandler('cancel', cancel))
     dp.add_handler(conv_handler)
     dp.add_handler(CommandHandler('latest',callback=Latest,filters= Filters.chat(-491388645)))
-    # Start the Bot
+    dp.add_handler(CommandHandler('send',send))
+        # Start the Bot
     updater.start_polling()
     updater.idle()
 
