@@ -7,6 +7,7 @@ bot.
 """
 import logging
 import os
+import time
 from functools import wraps
 import requests
 from bs4 import BeautifulSoup
@@ -15,6 +16,7 @@ from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMa
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler, PicklePersistence)
 from telegram.ext.dispatcher import run_async
+from telegram.error import TelegramError, Unauthorized, RetryAfter
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -54,18 +56,11 @@ def send_action(action):
 # Function to handle /start command
 @run_async
 def start(update, context):
-    #    reply_keyboard = [['Buy Key', 'Download Latest Loader'],['Live ESP Status','Report Problem']]
+    user = update.message.from_user
+    logger.info(" %s choosed  start option", user.first_name)
     data = context.user_data
-    print(data)
-   # user_id = update.message.from_user.id
     chat_id = update.message.chat.id
-    print(chat_id)
     data['user_id'] = chat_id
-    #print(data)
-    #print(pp.get_chat_data())
-  #  print(data.keys())
-    #print(user_id)
-    #context.bot.sendMessage(text='id grabbed' ,chat_id = chat_id)
     update.message.reply_text(
         'Hi! My name is Sparky Bot.\n'
         'How may i help you ?\n\n\n'
@@ -81,13 +76,16 @@ def start(update, context):
 @run_async
 def Key(update, context):
     user = update.message.from_user
-    logger.info(" %s choosed  %s option", user.first_name, update.message.text)
+    logger.info(" %s choosed  key option", user.first_name)
+    data = context.user_data
+    chat_id = update.message.chat.id
+    data['user_id'] = chat_id
     context.bot.forwardMessage(chat_id=update.message.chat_id, from_chat_id="-1001424216963", message_id="1787")
     update.message.reply_text('You can contact these resellers to buy your key')
-#@send_action(ChatAction.UPLOAD_DOCUMENT)
 @run_async
 def Latest(update, context):
     user = update.message.from_user
+    logger.info(" %s choosed  Latest option", user.first_name)
     context.bot.sendMessage(chat_id=update.message.chat_id,text="Okay Downloading Latest Loader")
     context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
     file = requests.get(url2)
@@ -104,11 +102,7 @@ def Latest(update, context):
     except Exception as e:
         print(e)
         x.edit_text('Unable to Download Latest Loader 🥺.')
-       # context.bot.sendMessage(chat_id="-491388645",
-                                #text=f"uploading failed for user {user.first_name} with usrname {user.username}")
-
     filename = apk_name + str(version) + ext
-    # remove(apk_name+str(version)+ext)
     if os.path.exists(filename):
         os.remove(filename)
         print(filename, "deleted successfully")
@@ -130,6 +124,10 @@ def Latest(update, context):
 @run_async
 def Download(update, context):
     user = update.message.from_user
+    logger.info(" %s: downloaded latest apk", user.first_name)
+    data = context.user_data
+    chat_id = update.message.chat.id
+    data['user_id'] = chat_id
     fname = user.first_name
     lname = user.last_name
     uname = user.username
@@ -139,9 +137,6 @@ def Download(update, context):
     else:
     	username =f"@{uname}"
     reply_keyboard = [['Buy Key', 'Download Latest Loader'], ['Live ESP Status', 'Report Problem']]
-    logger.info(" %s: downloaded latest apk", user.first_name)
-    #reply_markup = ReplyKeyboardRemove()
-
     x = update.message.reply_text(text='Downloading please wait')#,reply_markup = ReplyKeyboardRemove(reply_keyboard))
     context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
     # file = requests.get(url2)
@@ -176,6 +171,9 @@ def Download(update, context):
 def Status(update, context):
     user = update.message.from_user
     logger.info("%s selected  ESP STATUS", user.first_name)
+    data = context.user_data
+    chat_id = update.message.chat.id
+    data['user_id'] = chat_id
     url = requests.get(url1)
     soup = BeautifulSoup(url.text, 'lxml')
     version1 = soup.p.text[:32]
@@ -208,7 +206,10 @@ def cancel(update, context):
 @run_async
 def Report(update, context):
     user = update.message.from_user
-    logger.info("User %s started the conversation.", user.first_name)
+    logger.info("User %s started the conversation(Choosed Report Option).", user.first_name)
+    data = context.user_data
+    chat_id = update.message.chat.id
+    data['user_id'] = chat_id
     keyboard = [
         [InlineKeyboardButton("Global", callback_data=str(Gl)),
          InlineKeyboardButton("kr", callback_data=str(Kr))],
@@ -414,20 +415,69 @@ def save_input(update, context):
     for I in range(1):
         update.message.forward(chat_id="-491388645")
         update.message.reply_text("Thanks for reporting :)")
-    return True
+   # return True
 
 @run_async
 def send(update , context):
+	user = update.message.from_user
+	logger.info("User %s Choosed Send Option.", user.first_name)
+	print("choosed send")
 	message = update.message.reply_to_message.text
-	#update.message.reply_text(message)
-	for i in pp.get_chat_data():
-		context.bot.sendMessage(chat_id= i, text= message)
+	context.bot.sendMessage(chat_id="-491388645",text='Okay sending!')
+	active_user_count = 0
+	blocked_user_count = 0
+	for index , user_id in enumerate(pp.get_chat_data()):
+		if index %28 == 0:
+		    time.sleep(1)
+		else:
+			try:
+				context.bot.sendMessage(chat_id= user_id, text= message)
+				active_user_count += 1
+			except Unauthorized as e:
+				print(e)
+				context.bot.sendMessage(chat_id= "-491388645",text=f"{e}.")
+				blocked_user_count += 1
+			except RetryAfter as r:
+				print(f"Flood wait error at index: {index} and user id {user_id}.")
+				print(r)
+				time.sleep(r)
+				context.bot.sendMessage(chat_id="-491388645", text = f"Completed Flood Wait of {r} Seconds.")
+			except TelegramError as t:
+				print(t)
+				context.bot.sendMessage(chat_id="-491388645", text = f"Telegram error occured.\nThe error is :{t}.")
+	context.bot.sendMessage(chat_id="-491388645",text=f"Successfully Sent to :\n{active_user_count} Active users 😎.\nBlocked users {blocked_user_count}😤.")
 @run_async		
 def broadcast(update, context):
+	user = update.message.from_user
+	logger.info("User %s Choosed broadcast option.", user.first_name)
 	message_id = update.message.reply_to_message.message_id	
-	update.message.reply_text("okay! broadcast started")
-	for i in pp.get_chat_data():
-		context.bot.forward_message(chat_id = i ,from_chat_id= update.message.chat_id, message_id = message_id)
+	update.message.reply_text("Okay! Broadcast Started")
+	active_user_count = 0
+	blocked_user_count = 0
+	for index , user_id in enumerate(pp.get_chat_data()):
+		if index %28 == 0:
+		    time.sleep(1)
+		else:
+			try:
+				#context.bot.sendMessage(chat_id= user_id, text= message)
+				context.bot.forward_message(chat_id = user_id ,from_chat_id= update.message.chat_id, message_id = message_id)
+				active_user_count += 1
+			except Unauthorized as e:
+				print(e)
+				context.bot.sendMessage(chat_id= "-491388645",text=f"{e}.")
+				blocked_user_count += 1
+			except RetryAfter as r:
+				print(f"Flood wait error at index: {index} and user id {user_id}.")
+				print(r)
+				time.sleep(r)
+				context.bot.sendMessage(chat_id="-491388645", text = f"Completed Flood Wait of {r} Seconds.")
+			except TelegramError as t:
+				print(t)
+				context.bot.sendMessage(chat_id="-491388645", text = f"Telegram error occured.\nThe error is :{t}.")
+	context.bot.sendMessage(chat_id="-491388645",text=f"Successfully Broadcasted to :\n{active_user_count} Active  users 😎.\nBlocked users {blocked_user_count}😤.")
+
+	#for i in pp.get_chat_data():
+	#	context.bot.forward_message(chat_id = i ,from_chat_id= update.message.chat_id, message_id = message_id)
 
 # main function
 # @run_async
@@ -436,8 +486,8 @@ def main():
     print("Bot started successfully")
     print("By @xcruzhd2")
     #print(pp.get_bot_data().keys())
-    #for i in (pp.get_chat_data()):
-	    #print(i)
+   # for index , key in enumerate(pp.get_chat_data()):
+	 #   print(index, key)
     conv_handler = ConversationHandler(
         entry_points=[MessageHandler(Filters.regex('^(Report Problem)$'), Report)],
         states={
@@ -456,8 +506,9 @@ def main():
 
     # Getting the dispatcher to register handlers
     dp = updater.dispatcher
-    # registering handlers
-    dp.add_handler(CommandHandler('broadcast', broadcast))
+ 
+       # registering handlers
+    dp.add_handler(CommandHandler('broadcast', callback=broadcast,filters= Filters.chat(-491388645)))
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(MessageHandler(Filters.regex('^(Buy Key)$'), Key))
     dp.add_handler(MessageHandler(Filters.regex('^(Download Latest Loader)$'), Download))
@@ -465,11 +516,10 @@ def main():
     dp.add_handler(CommandHandler('cancel', cancel))
     dp.add_handler(conv_handler)
     dp.add_handler(CommandHandler('latest',callback=Latest,filters= Filters.chat(-491388645)))
-    dp.add_handler(CommandHandler('send',send))
+    dp.add_handler(CommandHandler('send',callback=send,filters=Filters.chat(-491388645)))
         # Start the Bot
     updater.start_polling()
     updater.idle()
-
 
 if __name__ == '__main__':
     main()
