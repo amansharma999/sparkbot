@@ -58,13 +58,15 @@ def send_action(action):
 def start(update, context):
     user = update.message.from_user
     logger.info(" %s choosed  start option", user.first_name)
+    name  =" "
+    if user.first_name:
+    	name = user.first_name
+    elif user.last_name:
+    	name = f"{user.first_name} {user.last_name}"
     data = context.user_data
     chat_id = update.message.chat.id
     data['user_id'] = chat_id
-    update.message.reply_text(
-        'Hi! My name is Sparky Bot.\n'
-        'How may i help you ?\n\n\n'
-        'Send /cancel to stop our conversation.\n'
+    update.message.reply_text(f"Hi! {name}\nMy name is Sparky Bot.\nHow may i help you ?\n\n\nSend /cancel to stop our conversation.\n"
         ,
         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True))
     return ConversationHandler.END
