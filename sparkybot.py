@@ -176,16 +176,18 @@ def Status(update, context):
     data['user_id'] = chat_id
     url = requests.get(url1)
     soup = BeautifulSoup(url.text, 'lxml')
-    version1 = soup.p.text[:32]
-    status1 = str(soup.p.text[33:])
+    #version1 = soup.p.text[:32]
+    #status1 = str(soup.p.text[33:])
     # nextsibling=soup.p.nextSibling
     # version2=nextsibling.text[:31]
     # status2=nextsibling.text[33:]
     all_p_tags = soup.find_all('p')
-    time = all_p_tags[2].text
-    time1 = time[:13]
-    time2 = time[14:]
-    update.message.reply_text(f"{version1}\n{status1}\n\n{time1}\n{time2}")
+    lite = all_p_tags[0].text.split(":" ,1)
+    other = all_p_tags[1].text.split(":",1)
+    time = all_p_tags[3].text.split(":",1)
+    #time1 = time[:13]
+    #time2 = time[14:]
+    update.message.reply_text(f"{lite[0]}:\n{lite[1]}\n\n{other[0]}:\n{other[1]}\n\n{time[0]}:\n{time[1]}")
 
 
 # cancel the conversation
