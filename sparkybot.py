@@ -11,7 +11,7 @@ import time
 from functools import wraps
 import requests
 from bs4 import BeautifulSoup
-from telegram import ChatAction
+from telegram import ChatAction, ParseMode
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler, PicklePersistence)
@@ -82,8 +82,16 @@ def Key(update, context):
     data = context.user_data
     chat_id = update.message.chat.id
     data['user_id'] = chat_id
-    context.bot.forwardMessage(chat_id=update.message.chat_id, from_chat_id="-1001424216963", message_id="1787")
-    update.message.reply_text('You can contact these resellers to buy your key')
+    url = requests.get(url1)
+    soup = BeautifulSoup(url.text, 'lxml')
+    resellers = ""
+    for i in soup.find(id='resellers').find_all('p'):
+		
+        resellers += f"<a href = '{i.a.string}'>👉 {i.strong.string}</a>" +'\n\n'
+    context.bot.send_message(chat_id=update.message.chat_id, reply_to_message_id = update.message.message_id,text='Buy keys from resellers below :\n' +resellers, 
+                 parse_mode=ParseMode.HTML,disable_web_page_preview =True)
+    #context.bot.forwardMessage(chat_id=update.message.chat_id, from_chat_id="-1001424216963", message_id="1787")
+    #update.message.reply_text(resellers)
 @run_async
 def Latest(update, context):
     user = update.message.from_user
@@ -183,13 +191,21 @@ def Status(update, context):
     # nextsibling=soup.p.nextSibling
     # version2=nextsibling.text[:31]
     # status2=nextsibling.text[33:]
-    all_p_tags = soup.find_all('p')
-    lite = all_p_tags[0].text.split(":" ,1)
-    other = all_p_tags[1].text.split(":",1)
-    time = all_p_tags[3].text.split(":",1)
+   # all_p_tags = soup.find_all('p')
+#    lite = all_p_tags[0].text.split(":" ,1)
+#    other = all_p_tags[1].text.split(":",1)
+#    time = all_p_tags[3].text.split(":",1)
     #time1 = time[:13]
     #time2 = time[14:]
-    update.message.reply_text(f"{lite[0]}:\n{lite[1]}\n\n{other[0]}:\n{other[1]}\n\n{time[0]}:\n{time[1]}")
+    def Status():	
+        status = ""
+        game_status = soup.find(id = 'gamestatus')
+        server_status = soup.find(id = 'serverstatus').find_all('p')[1].text.split(':')
+        for i in game_status.find_all('p'):
+            status +=  i.text +'\n\n'
+        return status,server_status
+    x ,y = Status()
+    update.message.reply_text(f"{x}\n{y[0]}:\n{y[1].strip()}")
 
 
 # cancel the conversation
@@ -469,6 +485,7 @@ def broadcast(update, context):
 			except Unauthorized as e:
 				print(e)
 				context.bot.sendMessage(chat_id= "-491388645",text=f"{e}.")
+				del pp.get_chat_data()[(user_id)]
 				blocked_user_count += 1
 			except RetryAfter as r:
 				print(f"Flood wait error at index: {index} and user id {user_id}.")
@@ -480,8 +497,12 @@ def broadcast(update, context):
 				context.bot.sendMessage(chat_id="-491388645", text = f"Telegram error occured.\nThe error is :{t}.")
 	context.bot.sendMessage(chat_id="-491388645",text=f"Successfully Broadcasted to :\n{active_user_count} Active  users 😎.\nBlocked users {blocked_user_count}😤.")
 
-	#for i in pp.get_chat_data():
-	#	context.bot.forward_message(chat_id = i ,from_chat_id= update.message.chat_id, message_id = message_id)
+
+def active_users(update, context):
+	count = 0
+	for index , user_id in enumerate(pp.get_chat_data()):
+		count = (index +1)
+	update.message.reply_text(f"Current users/groups in database is : {count}")
 
 # main function
 # @run_async
@@ -489,7 +510,7 @@ def main():
     updater = Updater(TOKEN,persistence=pp, use_context=True)    
     print("Bot started successfully")
     print("By @xcruzhd2")
-    #print(pp.get_bot_data().keys())
+    #print(pp.get_chat_data())
    # for index , key in enumerate(pp.get_chat_data()):
 	 #   print(index, key)
     conv_handler = ConversationHandler(
@@ -521,7 +542,8 @@ def main():
     dp.add_handler(conv_handler)
     dp.add_handler(CommandHandler('latest',callback=Latest,filters= Filters.chat(-491388645)))
     dp.add_handler(CommandHandler('send',callback=send,filters=Filters.chat(-491388645)))
-        # Start the Bot
+    dp.add_handler(CommandHandler('active_users',callback = active_users, filters= Filters.chat(-491388645)))
+    #Start the Bot
     updater.start_polling()
     updater.idle()
 
