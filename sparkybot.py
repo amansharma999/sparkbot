@@ -17,6 +17,8 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler, PicklePersistence)
 from telegram.ext.dispatcher import run_async
 from telegram.error import TelegramError, Unauthorized, RetryAfter
+import re 
+pattern = re.compile("\((.*?)\)")
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -93,31 +95,34 @@ def Key(update, context):
     #context.bot.forwardMessage(chat_id=update.message.chat_id, from_chat_id="-1001424216963", message_id="1787")
     #update.message.reply_text(resellers)
 @run_async
-def Latest(update, context):
+def get_data(update, context):
     user = update.message.from_user
     logger.info(" %s choosed  Latest option", user.first_name)
-    context.bot.sendMessage(chat_id=update.message.chat_id,text="Okay Downloading Latest Loader")
+    #context.bot.sendMessage(chat_id=update.message.chat_id,text="Okay Downloading Latest Loader")
+    x=context.bot.sendMessage(chat_id = update.message.chat_id,text = "Okay Sending Bot Data.")
     context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
-    file = requests.get(url2)
-    url = requests.get(url1)
-    soup = BeautifulSoup(url.text, 'lxml')
-    version = soup.a.text[15:]
-    context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
-    with open(apk_name + str(version) + ext, 'wb') as e:
-        e.write(file.content)
+    #file = requests.get(url2)
+#    url = requests.get(url1)
+#    soup = BeautifulSoup(url.text, 'lxml')
+#    version = soup.a.text[15:]
+#    context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
+    #with open(apk_name + str(version) + ext, 'wb') as e:
+        #e.write(file.content)
+       
     try:
-        x = context.bot.send_document(chat_id=update.message.chat_id, document=open(apk_name + str(version) + ext, 'rb'))
-        global file_id
-        file_id = x.document.file_id
+        context.bot.send_document(chat_id=update.message.chat_id, document=open('conversationbot_chat_data', 'rb'))
+        context.bot.send_document(chat_id=update.message.chat_id, document=open('conversationbot_user_data','rb'))
+        #global file_id
+        #file_id = x.document.file_id
     except Exception as e:
         print(e)
-        x.edit_text('Unable to Download Latest Loader 🥺.')
-    filename = apk_name + str(version) + ext
-    if os.path.exists(filename):
-        os.remove(filename)
-        print(filename, "deleted successfully")
-    else:
-        print("file not found")
+        x.edit_text(f'Unable to send bot  data 🥺. The error is : {e}')
+    #filename = apk_name + str(version) + ext
+#    if os.path.exists(filename):
+#        os.remove(filename)
+#        print(filename, "deleted successfully")
+#    else:
+#        print("file not found")
 # Deletes sparkcheats apk from storage
 
 # def remove(filename):
@@ -146,20 +151,24 @@ def Download(update, context):
     	username = None
     else:
     	username =f"@{uname}"
-    reply_keyboard = [['Buy Key', 'Download Latest Loader'], ['Live ESP Status', 'Report Problem']]
+   # reply_keyboard = [['Buy Key', 'Download Latest Loader'], ['Live ESP Status', 'Report Problem']]
     x = update.message.reply_text(text='Downloading please wait')#,reply_markup = ReplyKeyboardRemove(reply_keyboard))
     context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
-    # file = requests.get(url2)
-    # url = requests.get(url1)
-    # soup = BeautifulSoup(url.text, 'lxml')
+    file = requests.get(url2)
+    url = requests.get(url1)
+    soup = BeautifulSoup(url.text, 'lxml')
+    a_tag = soup.find('a', class_ = 'btn btn-success shadow-lg')
+    version = re.search(pattern, a_tag.text).group()
     # version = soup.a.text[15:]
-    # with open(apk_name + str(version) + ext, 'wb') as e:
-    #     e.write(file.content)
+    app = apk_name+str(version)+ext
+    with open(app, 'wb') as e:
+         e.write(file.content)
     x.edit_text('Download successfull\nuploading now.')
     try:
-        context.bot.send_document(chat_id=update.message.chat_id, document=file_id,
-                                  reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True,
-                                                                   resize_keyboard=True))
+        #context.bot.send_document(chat_id=update.message.chat_id, document=file_id,
+#                                  reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True,
+#                                                                   resize_keyboard=True))
+        context.bot.send_document(chat_id = update.message.chat_id, document = open(app,'rb'),reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True,resize_keyboard=True))
     except Exception as e:
         print(e)
         x.edit_text('Uploading failed.\n\nMy devs has been informed.\nPlease try after sometime')
@@ -167,11 +176,11 @@ def Download(update, context):
 
     # filename = apk_name + str(version) + ext
     # # remove(apk_name+str(version)+ext)
-    # if os.path.exists(filename):
-    #     os.remove(filename)
-    #     print(filename, "delete successfully")
-    # else:
-    #     print("file not found")
+    if os.path.exists(app):
+         os.remove(app)
+         print(app, "delete successfully")
+    else:
+         print("file not found")
 
 
 # when user clicks on ESP Status button
@@ -541,7 +550,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex('^(Live ESP Status)$'), Status))
     #dp.add_handler(CommandHandler('cancel', cancel))
     dp.add_handler(conv_handler)
-    dp.add_handler(CommandHandler('latest',callback=Latest,filters= Filters.chat(-491388645)))
+    dp.add_handler(CommandHandler('get_data',callback=get_data,filters= Filters.chat(-491388645)))
     dp.add_handler(CommandHandler('send',callback=send,filters=Filters.chat(-491388645)))
     dp.add_handler(CommandHandler('active_users',callback = active_users, filters= Filters.chat(-491388645)))
     #Start the Bot
