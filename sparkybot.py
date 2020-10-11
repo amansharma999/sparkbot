@@ -66,7 +66,7 @@ def start(update, context):
     data = context.user_data
     chat_id = update.message.chat.id
     data['user_id'] = chat_id
-    update.message.reply_text(f"Hi! {name}\nMy name is Sparky Bot.\nHow may i help you ?\n\n\nSend /cancel to stop our conversation.\n"
+    update.message.reply_text(f"Hi! {name}.\nHow may i help you ?😊"
         ,
         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True))
     return ConversationHandler.END
@@ -538,7 +538,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex('^(Buy Key)$'), Key))
     dp.add_handler(MessageHandler(Filters.regex('^(Download Latest Loader)$'), Download))
     dp.add_handler(MessageHandler(Filters.regex('^(Live ESP Status)$'), Status))
-    dp.add_handler(CommandHandler('cancel', cancel))
+    #dp.add_handler(CommandHandler('cancel', cancel))
     dp.add_handler(conv_handler)
     dp.add_handler(CommandHandler('latest',callback=Latest,filters= Filters.chat(-491388645)))
     dp.add_handler(CommandHandler('send',callback=send,filters=Filters.chat(-491388645)))
