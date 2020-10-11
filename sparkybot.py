@@ -435,6 +435,7 @@ def save_input(update, context):
     for I in range(1):
         update.message.forward(chat_id="-491388645")
         update.message.reply_text("Thanks for reporting :)")
+        return ConversationHandler.END
    # return True
 
 @run_async
