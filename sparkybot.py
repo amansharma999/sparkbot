@@ -97,7 +97,7 @@ def Key(update, context):
 @run_async
 def get_data(update, context):
     user = update.message.from_user
-    logger.info(" %s choosed  Latest option", user.first_name)
+    logger.info(" %s choosed get_data option", user.first_name)
     #context.bot.sendMessage(chat_id=update.message.chat_id,text="Okay Downloading Latest Loader")
     x=context.bot.sendMessage(chat_id = update.message.chat_id,text = "Okay Sending Bot Data.")
     context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
