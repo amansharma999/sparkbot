@@ -200,7 +200,7 @@ def Status(update, context):
     def Status():	
         status = ""
         game_status = soup.find(id = 'gamestatus')
-        server_status = soup.find(id = 'serverstatus').find_all('p')[1].text.split(':')
+        server_status = soup.find(id = 'serverstatus').find_all('p')[1].text.split(':',1)
         for i in game_status.find_all('p'):
             status +=  i.text +'\n\n'
         return status,server_status
