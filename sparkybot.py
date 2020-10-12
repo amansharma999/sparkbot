@@ -149,8 +149,10 @@ def get_data(update, context):
 
 @run_async
 def set_data(update , context):
-	if os.path.exists('conversationbot_chat_data' and 'conversationbot_user_data'):
-		os.remove('conversationbot_chat_data' and 'conversationbot_user_data')
+	if os.path.exists('conversationbot_chat_data'):# and 'conversationbot_user_data'):
+		os.remove('conversationbot_chat_data')# and 'conversationbot_user_data')
+	if os.path.exists('conversationbot_user_data'):
+		os.remove('conversationbot_user_data')
 	try:
 		newFile = update.message.reply_to_message.effective_attachment.get_file()
 		newFile.download()
