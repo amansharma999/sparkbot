@@ -26,17 +26,24 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 # stages
-First, Second, Third = range(3)
-# first stage callbackdata
+First, Second, Third, Fourth = range(4)
+# first stage callbacks
+Pubg, PubgLite = range(2)
+#second stage callbacks
 Gl, Kr, Tw, Vn = range(4)
-# second stage callback data
+# Third stage callback data
 Bit32, Bit64 = range(2)
 
 url1 = 'https://sparkcheats.tech'
+
 url2 = 'https://sparkcheats.tech/download'
+
 apk_name = 'SparkLoader'
+
 ext = '.apk'
+
 TOKEN = "1129141206:AAE64a9Msk0lKoDG3qSUcpckOzpMx8F7SN4"
+
 # keyboard
 reply_keyboard = [['🔑Buy Key', '📥Download Latest Loader '], ['📊Live ESP Status', '🗳Report Problem']]
 #file_id = ""
@@ -195,7 +202,7 @@ def Download(update, context):
     except Exception as e:
         print(e)
         x.edit_text('Uploading failed.\n\nMy devs has been informed.\nPlease try after sometime')
-        context.bot.sendMessage(chat_id="-491388645",text=f"uploading failed 🥺🥺 \nName  : {user.first_name} \nusername : {username}")
+        context.bot.sendMessage(chat_id="-1001485255838",text=f"uploading failed 🥺🥺 \nName  : {user.first_name} \nusername : {username}")
 
     # filename = apk_name + str(version) + ext
     # # remove(apk_name+str(version)+ext)
@@ -250,18 +257,46 @@ def cancel(update, context):
     update.message.reply_text('Bye! I hope we can talk again some day.' +sparkcheats)
     # reply_markup=ReplyKeyboardRemove())
     return ConversationHandler.END
-
-
 # First level conversations starts here-------#
+@run_async
+def Report(update, context):
+	user = update.message.from_user
+	logger.info("User %s started the conversation(Choosed Report Option).", user.first_name)
+	data = context.user_data
+	chat_id = update.message.chat.id
+	data['user_id'] = chat_id
+	keyboard = [
+        [InlineKeyboardButton("Pubg", callback_data=str(Pubg)),
+         InlineKeyboardButton("PubgLite", callback_data=str(PubgLite))],
+    ]
+	reply_markup = InlineKeyboardMarkup(keyboard)
+	update.message.reply_text(
+        "Select Your Game ",
+        reply_markup=reply_markup
+    )
+	return First
+    
+	
+# second level conversations---------#
 # @run_async
 @send_action(ChatAction.TYPING)
 @run_async
-def Report(update, context):
-    user = update.message.from_user
+#def Report(update, context):
+def Pubg(update, context):
+    user = update.callback_query.from_user
     logger.info("User %s started the conversation(Choosed Report Option).", user.first_name)
-    data = context.user_data
-    chat_id = update.message.chat.id
-    data['user_id'] = chat_id
+    fname = user.first_name
+    lname = user.last_name
+    uname = user.username
+    username = ""
+    if uname == None:
+    	username = None
+    else:
+    	username =f"@{uname}"
+    	
+    name = f"{fname} {lname}"                                                                               
+    msg = f"Name : {name}\nusername : {username}\nchoosed PUBG "
+    context.bot.sendMessage(chat_id="-1001485255838", text=msg)
     keyboard = [
         [InlineKeyboardButton("Global", callback_data=str(Gl)),
          InlineKeyboardButton("kr", callback_data=str(Kr))],
@@ -269,14 +304,39 @@ def Report(update, context):
          InlineKeyboardButton("Vn", callback_data=str(Vn))],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text(
-        "Select your PUBG version",
-        reply_markup=reply_markup
+    
+    query = update.callback_query
+    query.answer()
+    query.edit_message_text(
+        text="Okay now select your pubg version.",reply_markup=reply_markup
     )
-    return First
+    #update.message.reply_text(
+#        "Select your PUBG version",
+#        reply_markup=reply_markup
+#    )
 
+    return Second
 
-# second level conversations---------#
+def PubgLite(update, context):
+    user = update.callback_query.from_user
+    fname = user.first_name
+    lname = user.last_name
+    uname = user.username
+    username = ""
+    if uname == None:
+    	username = None
+    else:
+    	username =f"@{uname}"
+    name = f"{fname} {lname}"
+    msg = f"Name : {name}\nusername : {username}\nchoosed PUBG Lite "
+    context.bot.sendMessage(chat_id="-1001485255838", text=msg)
+    query = update.callback_query
+    query.answer()
+    query.edit_message_text(
+        text="Okay now describe your problem in a single message."
+    )
+    return  Fourth
+# Third level conversations---------------#
 # when user selects global option
 # @run_async
 @send_action(ChatAction.TYPING)
@@ -293,7 +353,7 @@ def Pglobal(update, context):
     	username =f"@{uname}"
     name = f"{fname} {lname}"
     msg = f"Name : {name}\nusername : {username}\nchoosed PUBG Global "
-    context.bot.sendMessage(chat_id="-491388645", text=msg)
+    context.bot.sendMessage(chat_id="-1001485255838", text=msg)
     query = update.callback_query
     query.answer()
 
@@ -306,7 +366,7 @@ def Pglobal(update, context):
         text="You selected PUBG Global\n\n Now Select your  PUBG bit version",
         reply_markup=reply_markup
     )
-    return Second
+    return Third
 
 
 # when user selects kr option
@@ -325,7 +385,7 @@ def Pkr(update, context):
     	username =f"@{uname}"
     name = f"{fname} {lname}"
     msg = f"Name : {name}\nusername : {username}\nchoosed PUBG Kr"
-    context.bot.sendMessage(chat_id="-491388645", text=msg)
+    context.bot.sendMessage(chat_id="-1001485255838", text=msg)
     query = update.callback_query
     query.answer()
     keyboard = [
@@ -337,7 +397,7 @@ def Pkr(update, context):
         text="You selected PUBG Kr\n\n Now Select your  PUBG bit version",
         reply_markup=reply_markup
     )
-    return Second
+    return Third
 
 
 # when user selects Tw option
@@ -356,7 +416,7 @@ def Ptw(update, context):
     	username =f"@{uname}"
     name = f"{fname} {lname}"
     msg = f"Name : {name}\nusername : {username}\nchoosed PUBG Tw "
-    context.bot.sendMessage(chat_id="-491388645", text=msg)
+    context.bot.sendMessage(chat_id="-1001485255838", text=msg)
     query = update.callback_query
     query.answer()
     keyboard = [
@@ -369,7 +429,7 @@ def Ptw(update, context):
         text="You selected PUBG tw\n\n Now Select your  PUBG bit version",
         reply_markup=reply_markup
     )
-    return Second
+    return Third
 
 
 # when user selects Vn option
@@ -388,7 +448,7 @@ def Pvn(update, context):
     	username =f"@{uname}"
     name = f"{fname} {lname}"
     msg = f"Name : {name}\nusername : {username}\nchoosed PUBG Vn"
-    context.bot.sendMessage(chat_id="-491388645", text=msg)
+    context.bot.sendMessage(chat_id="-1001485255838", text=msg)
     query = update.callback_query
     query.answer()
     keyboard = [
@@ -400,10 +460,10 @@ def Pvn(update, context):
         text="You selected PUBG Vn\n\n Now Select your  PUBG bit version",
         reply_markup=reply_markup
     )
-    return Second
+    return Third
 
+# Fourth level conversations---------------#
 
-# Third level conversations---------------#
 # when user sects 32bit option
 # @run_async
 @send_action(ChatAction.TYPING)
@@ -420,14 +480,14 @@ def Bit_32(update, context):
     	username =f"@{uname}"
     name = f"{fname} {lname}"
     msg = f"Name : {name}\nusername : {username}\nchoosed 32bit "
-    context.bot.sendMessage(chat_id="-491388645", text=msg)
+    context.bot.sendMessage(chat_id="-1001485255838", text=msg)
     query = update.callback_query
     query.answer()
     query.edit_message_text(
         text="Okay now describe your problem in a single message."
     )
 
-    return Third
+    return Fourth
 
 
 # when user selects 64 bit option
@@ -447,14 +507,14 @@ def Bit_64(update, context):
     	
     name = f"{fname} {lname}"                                                                               
     msg = f"Name : {name}\nusername : {username}\nchoosed 64bit "
-    context.bot.sendMessage(chat_id="-491388645", text=msg)
+    context.bot.sendMessage(chat_id="-1001485255838", text=msg)
     query = update.callback_query
     query.answer()
     query.edit_message_text(
         text="Okay now describe your problem in a single message."
     )
 
-    return Third
+    return Fourth
 
 
 # Third level Conversation
@@ -465,7 +525,7 @@ def Bit_64(update, context):
 def save_input(update, context):
     """Saves  and send input ."""
     for I in range(1):
-        update.message.forward(chat_id="-491388645")
+        update.message.forward(chat_id="-1001485255838")
         update.message.reply_text("Thanks for reporting :)"+sparkcheats)
         return ConversationHandler.END
    # return True
@@ -476,29 +536,32 @@ def send(update , context):
 	logger.info("User %s Choosed Send Option.", user.first_name)
 	print("choosed send")
 	message = update.message.reply_to_message.text
-	context.bot.sendMessage(chat_id="-491388645",text='Okay sending!')
+	context.bot.sendMessage(chat_id="-1001485255838",text='Okay sending!')
 	active_user_count = 0
 	blocked_user_count = 0
 	for index , user_id in enumerate(pp.get_chat_data()):
-		if index %28 == 0:
+		if index > 0 and index %28 == 0:
 		    time.sleep(1)
 		else:
 			try:
-				context.bot.sendMessage(chat_id= user_id, text= message)
-				active_user_count += 1
+				x=context.bot.sendMessage(chat_id= user_id, text= message)
+				if x:
+					active_user_count+=1
+#				active_user_count += 1
 			except Unauthorized as e:
 				print(e)
-				context.bot.sendMessage(chat_id= "-491388645",text=f"{e}.")
+				context.bot.sendMessage(chat_id= "-1001485255838",text=f"{e}.")
 				blocked_user_count += 1
 			except RetryAfter as r:
 				print(f"Flood wait error at index: {index} and user id {user_id}.")
 				print(r)
 				time.sleep(r)
-				context.bot.sendMessage(chat_id="-491388645", text = f"Completed Flood Wait of {r} Seconds.")
+				context.bot.sendMessage(chat_id="-1001485255838", text = f"Completed Flood Wait of {r} Seconds.")
 			except TelegramError as t:
 				print(t)
-				context.bot.sendMessage(chat_id="-491388645", text = f"Telegram error occured.\nThe error is :{t}.")
-	context.bot.sendMessage(chat_id="-491388645",text=f"Successfully Sent to :\n{active_user_count} Active users 😎.\nBlocked users {blocked_user_count}😤.")
+				context.bot.sendMessage(chat_id="-1001485255838", text = f"Telegram error occured.\nThe error is :{t}.")
+			#active_user_count += 1
+	context.bot.sendMessage(chat_id="-1001485255838",text=f"Successfully Sent to :\n{active_user_count} Active users 😎.\nBlocked users {blocked_user_count}😤.")
 @run_async		
 def broadcast(update, context):
 	user = update.message.from_user
@@ -508,7 +571,7 @@ def broadcast(update, context):
 	active_user_count = 0
 	blocked_user_count = 0
 	for index , user_id in enumerate(pp.get_chat_data()):
-		if index %28 == 0:
+		if index > 0 and index %28 == 0:
 		    time.sleep(1)
 		else:
 			try:
@@ -517,24 +580,26 @@ def broadcast(update, context):
 				active_user_count += 1
 			except Unauthorized as e:
 				print(e)
-				context.bot.sendMessage(chat_id= "-491388645",text=f"{e}.")
+				context.bot.sendMessage(chat_id= "-1001485255838",text=f"{e}.")
 				del pp.get_chat_data()[(user_id)]
 				blocked_user_count += 1
 			except RetryAfter as r:
 				print(f"Flood wait error at index: {index} and user id {user_id}.")
 				print(r)
 				time.sleep(r)
-				context.bot.sendMessage(chat_id="-491388645", text = f"Completed Flood Wait of {r} Seconds.")
+				context.bot.sendMessage(chat_id="-1001485255838", text = f"Completed Flood Wait of {r} Seconds.")
 			except TelegramError as t:
 				print(t)
-				context.bot.sendMessage(chat_id="-491388645", text = f"Telegram error occured.\nThe error is :{t}.")
-	context.bot.sendMessage(chat_id="-491388645",text=f"Successfully Broadcasted to :\n{active_user_count} Active  users 😎.\nBlocked users {blocked_user_count}😤.")
+				context.bot.sendMessage(chat_id="-1001485255838", text = f"Telegram error occured.\nThe error is :{t}.")
+	context.bot.sendMessage(chat_id="-1001485255838",text=f"Successfully Broadcasted to :\n{active_user_count} Active  users 😎.\nBlocked users {blocked_user_count}😤.")
 
 
 def active_users(update, context):
 	count = 0
-	for index , user_id in enumerate(pp.get_chat_data()):
-		count = (index +1)
+	#for index , user_id in enumerate(pp.get_chat_data()):
+	#	count = (index +1)
+	for I in range(len(pp.get_chat_data())):
+		count +=1
 	update.message.reply_text(f"Current users/groups in database is : {count}")
 
 # main function
@@ -543,19 +608,22 @@ def main():
     updater = Updater(TOKEN,persistence=pp, use_context=True)    
     print("Bot started successfully")
     print("By @xcruzhd2")
-    #print(pp.get_chat_data())
-   # for index , key in enumerate(pp.get_chat_data()):
-	 #   print(index, key)
+    print(pp.get_chat_data())
+    print('*'*30)
+    for index , key in enumerate(pp.get_chat_data()):
+	    print(index, key)
     conv_handler = ConversationHandler(
         entry_points=[MessageHandler(Filters.regex('^(🗳Report Problem)$'), Report)],
         states={
-            First: [CallbackQueryHandler(Pglobal, pattern='^' + str(Gl) + '$'),
+            First: [CallbackQueryHandler(Pubg, pattern='^' + str(Pubg) + '$'),
+                    CallbackQueryHandler(PubgLite,pattern='^' + str(PubgLite) + '$')],
+            Second: [CallbackQueryHandler(Pglobal, pattern='^' + str(Gl) + '$'),
                     CallbackQueryHandler(Pkr, pattern='^' + str(Kr) + '$'),
                     CallbackQueryHandler(Ptw, pattern='^' + str(Tw) + '$'),
                     CallbackQueryHandler(Pvn, pattern='^' + str(Vn) + '$')],
-            Second: [CallbackQueryHandler(Bit_32, pattern='^' + str(Bit32) + '$'),
+            Third: [CallbackQueryHandler(Bit_32, pattern='^' + str(Bit32) + '$'),
                      CallbackQueryHandler(Bit_64, pattern='^' + str(Bit64) + '$')],
-            Third: [MessageHandler(Filters.all & ~Filters.command, save_input)]
+            Fourth: [MessageHandler(Filters.all & ~Filters.command, save_input)]
         },
         fallbacks=[CommandHandler('cancel', cancel)],
         allow_reentry=True,
@@ -566,17 +634,17 @@ def main():
     dp = updater.dispatcher
  
        # registering handlers
-    dp.add_handler(CommandHandler('broadcast', callback=broadcast,filters= Filters.chat(-491388645)))
+    dp.add_handler(CommandHandler('broadcast', callback=broadcast,filters= Filters.chat(-1001485255838)))
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(MessageHandler(Filters.regex('^(🔑Buy Key)$'), Key))
     dp.add_handler(MessageHandler(Filters.regex('^(📥Download Latest Loader)$'), Download))
     dp.add_handler(MessageHandler(Filters.regex('^(📊Live ESP Status)$'), Status))
     #dp.add_handler(CommandHandler('cancel', cancel))
     dp.add_handler(conv_handler)
-    dp.add_handler(CommandHandler('get_data',callback=get_data,filters= Filters.chat(-491388645)))
-    dp.add_handler(CommandHandler('send',callback=send,filters=Filters.chat(-491388645)))
-    dp.add_handler(CommandHandler('active_users',callback = active_users, filters= Filters.chat(-491388645)))
-    dp.add_handler(CommandHandler('set_data', callback=set_data,filters=Filters.chat(-491388645)))
+    dp.add_handler(CommandHandler('get_data',callback=get_data,filters= Filters.chat(-1001485255838)))
+    dp.add_handler(CommandHandler('send',callback=send,filters=Filters.chat(-1001485255838)))
+    dp.add_handler(CommandHandler('active_users',callback = active_users, filters= Filters.chat(-1001485255838)))
+    dp.add_handler(CommandHandler('set_data', callback=set_data,filters=Filters.chat(-1001485255838)))
     #Start the Bot
     updater.start_polling()
     updater.idle()
