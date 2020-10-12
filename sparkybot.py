@@ -38,8 +38,9 @@ apk_name = 'SparkLoader'
 ext = '.apk'
 TOKEN = "1129141206:AAE64a9Msk0lKoDG3qSUcpckOzpMx8F7SN4"
 # keyboard
-reply_keyboard = [['Buy Key', 'Download Latest Loader'], ['Live ESP Status', 'Report Problem']]
-file_id = ""
+reply_keyboard = [['🔑Buy Key', '📥Download Latest Loader '], ['📊Live ESP Status', '🗳Report Problem']]
+#file_id = ""
+sparkcheats = "\n\nıllıllı @SPARKCHEATS ıllıllı"
 
 pp = PicklePersistence(filename='conversationbot',single_file= False)
 # Decorator function for sending chat actions while processing func commands
@@ -60,7 +61,7 @@ def send_action(action):
 def start(update, context):
     user = update.message.from_user
     logger.info(" %s choosed  start option", user.first_name)
-    name  =" "
+    #name  =" "
     if user.first_name:
     	name = user.first_name
     elif user.last_name:
@@ -68,9 +69,13 @@ def start(update, context):
     data = context.user_data
     chat_id = update.message.chat.id
     data['user_id'] = chat_id
-    update.message.reply_text(f"Hi! {name}.\nHow may i help you ?😊"
-        ,
-        reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True))
+    msg =f'<b>Hi! {name}.\n\nHow may I help you?</b>😊{sparkcheats}'
+    #update.message.reply_text(msg
+       # ,
+        #reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True,parse_mod = ParseMode.HTML,disable_web_page_preview=True))
+    
+    context.bot.send_message(chat_id=update.message.chat_id, reply_to_message_id = update.message.message_id,text=msg, 
+                 parse_mode=ParseMode.HTML,disable_web_page_preview =True,reply_markup=ReplyKeyboardMarkup(reply_keyboard,one_time_keyboard=True,resize_keyboard=True))
     return ConversationHandler.END
 
 
@@ -90,14 +95,14 @@ def Key(update, context):
     for i in soup.find(id='resellers').find_all('p'):
 		
         resellers += f"<a href = '{i.a.string}'>👉 {i.strong.string}</a>" +'\n\n'
-    context.bot.send_message(chat_id=update.message.chat_id, reply_to_message_id = update.message.message_id,text='Buy keys from resellers below :\n' +resellers, 
+    context.bot.send_message(chat_id=update.message.chat_id, reply_to_message_id = update.message.message_id,text='Buy keys from resellers below :\n\n' +resellers +sparkcheats, 
                  parse_mode=ParseMode.HTML,disable_web_page_preview =True)
     #context.bot.forwardMessage(chat_id=update.message.chat_id, from_chat_id="-1001424216963", message_id="1787")
     #update.message.reply_text(resellers)
 @run_async
 def get_data(update, context):
     user = update.message.from_user
-    logger.info(" %s choosed get_data option", user.first_name)
+    logger.info(" %s choosed  get_data option", user.first_name)
     #context.bot.sendMessage(chat_id=update.message.chat_id,text="Okay Downloading Latest Loader")
     x=context.bot.sendMessage(chat_id = update.message.chat_id,text = "Okay Sending Bot Data.")
     context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=ChatAction.UPLOAD_DOCUMENT)
@@ -135,6 +140,24 @@ def get_data(update, context):
 
 # Download+remove sparkcheats apk
 
+@run_async
+def set_data(update , context):
+	try:
+		newFile = update.message.reply_to_message.effective_attachment.get_file()
+		newFile.download()
+		update.message.reply_text('Data Updated Successfully!')
+	except Exception as e:
+		print(e)
+		update.message.reply_text(e)
+
+
+
+
+
+
+
+
+
 @send_action(ChatAction.TYPING)
 @run_async
 def Download(update, context):
@@ -163,7 +186,7 @@ def Download(update, context):
     app = apk_name+str(version)+ext
     with open(app, 'wb') as e:
          e.write(file.content)
-    x.edit_text('Download successfull\nuploading now.')
+    x.edit_text('Download successfull\nuploading now.'+sparkcheats)
     try:
         #context.bot.send_document(chat_id=update.message.chat_id, document=file_id,
 #                                  reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True,
@@ -206,15 +229,15 @@ def Status(update, context):
 #    time = all_p_tags[3].text.split(":",1)
     #time1 = time[:13]
     #time2 = time[14:]
-    def Status():	
+    def Statusxy():	
         status = ""
         game_status = soup.find(id = 'gamestatus')
         server_status = soup.find(id = 'serverstatus').find_all('p')[1].text.split(':',1)
         for i in game_status.find_all('p'):
             status +=  i.text +'\n\n'
         return status,server_status
-    x ,y = Status()
-    update.message.reply_text(f"{x}\n{y[0]}:\n{y[1].strip()}")
+    x ,y = Statusxy()
+    update.message.reply_text(f"{x}\n{y[0]}:\n{y[1].strip()}" + sparkcheats)
 
 
 # cancel the conversation
@@ -224,7 +247,7 @@ def Status(update, context):
 def cancel(update, context):
     user = update.message.from_user
     logger.info("User %s canceled the conversation.", user.first_name)
-    update.message.reply_text('Bye! I hope we can talk again some day.')
+    update.message.reply_text('Bye! I hope we can talk again some day.' +sparkcheats)
     # reply_markup=ReplyKeyboardRemove())
     return ConversationHandler.END
 
@@ -443,7 +466,7 @@ def save_input(update, context):
     """Saves  and send input ."""
     for I in range(1):
         update.message.forward(chat_id="-491388645")
-        update.message.reply_text("Thanks for reporting :)")
+        update.message.reply_text("Thanks for reporting :)"+sparkcheats)
         return ConversationHandler.END
    # return True
 
@@ -524,7 +547,7 @@ def main():
    # for index , key in enumerate(pp.get_chat_data()):
 	 #   print(index, key)
     conv_handler = ConversationHandler(
-        entry_points=[MessageHandler(Filters.regex('^(Report Problem)$'), Report)],
+        entry_points=[MessageHandler(Filters.regex('^(🗳Report Problem)$'), Report)],
         states={
             First: [CallbackQueryHandler(Pglobal, pattern='^' + str(Gl) + '$'),
                     CallbackQueryHandler(Pkr, pattern='^' + str(Kr) + '$'),
@@ -545,14 +568,15 @@ def main():
        # registering handlers
     dp.add_handler(CommandHandler('broadcast', callback=broadcast,filters= Filters.chat(-491388645)))
     dp.add_handler(CommandHandler('start', start))
-    dp.add_handler(MessageHandler(Filters.regex('^(Buy Key)$'), Key))
-    dp.add_handler(MessageHandler(Filters.regex('^(Download Latest Loader)$'), Download))
-    dp.add_handler(MessageHandler(Filters.regex('^(Live ESP Status)$'), Status))
+    dp.add_handler(MessageHandler(Filters.regex('^(🔑Buy Key)$'), Key))
+    dp.add_handler(MessageHandler(Filters.regex('^(📥Download Latest Loader)$'), Download))
+    dp.add_handler(MessageHandler(Filters.regex('^(📊Live ESP Status)$'), Status))
     #dp.add_handler(CommandHandler('cancel', cancel))
     dp.add_handler(conv_handler)
     dp.add_handler(CommandHandler('get_data',callback=get_data,filters= Filters.chat(-491388645)))
     dp.add_handler(CommandHandler('send',callback=send,filters=Filters.chat(-491388645)))
     dp.add_handler(CommandHandler('active_users',callback = active_users, filters= Filters.chat(-491388645)))
+    dp.add_handler(CommandHandler('set_data', callback=set_data,filters=Filters.chat(-491388645)))
     #Start the Bot
     updater.start_polling()
     updater.idle()
