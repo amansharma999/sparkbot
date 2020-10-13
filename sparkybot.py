@@ -18,7 +18,7 @@ from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMa
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler, PicklePersistence)
 from telegram.ext.dispatcher import run_async
-from telegram.error import TelegramError, Unauthorized, RetryAfter
+from telegram.error import TelegramError, Unauthorized, RetryAfter, ChatMigrated
 import re 
 pattern = re.compile("\((.*?)\)")
 
@@ -561,11 +561,18 @@ def send(update , context):
 				print(e)
 				context.bot.sendMessage(chat_id= "-1001485255838",text=f"{e}.")
 				blocked_user_count += 1
+				#del pp.chat_data[user_id]
 			except RetryAfter as r:
 				print(f"Flood wait error at index: {index} and user id {user_id}.")
 				print(r)
 				time.sleep(r)
 				context.bot.sendMessage(chat_id="-1001485255838", text = f"Completed Flood Wait of {r} Seconds.")
+			except ChatMigrated as c:
+				print (c)
+				new_id = c.new_chat_id
+				pp.chat_data[new_id] = pp.chat_data.pop(user_id)
+				pp.flush()
+				print('dictionary updated successfully')
 			except TelegramError as t:
 				print(t)
 				context.bot.sendMessage(chat_id="-1001485255838", text = f"Telegram error occured.\nThe error is :{t}.")
@@ -597,12 +604,18 @@ def broadcast(update, context):
 				print(r)
 				time.sleep(r)
 				context.bot.sendMessage(chat_id="-1001485255838", text = f"Completed Flood Wait of {r} Seconds.")
+			except ChatMigrated as c:
+				print (c)
+				new_id = c.new_chat_id
+				pp.chat_data[new_id] = pp.chat_data.pop(user_id)
+				pp.flush()
+				print('dictionary updated successfully')
 			except TelegramError as t:
 				print(t)
 				context.bot.sendMessage(chat_id="-1001485255838", text = f"Telegram error occured.\nThe error is :{t}.")
 	context.bot.sendMessage(chat_id="-1001485255838",text=f"Successfully Broadcasted to :\n{active_user_count} Active  users 😎.\nBlocked users {blocked_user_count}😤.")
 
-
+#func for counting number of users/groups
 def active_users(update, context):
 	count = 0
 	#for index , user_id in enumerate(pp.get_chat_data()):
@@ -617,10 +630,18 @@ def main():
     updater = Updater(TOKEN,persistence=pp, use_context=True)    
     print("Bot started successfully")
     print("By @xcruzhd2")
-    print(pp.get_chat_data())
-    print('*'*30)
-    for index , key in enumerate(pp.get_chat_data()):
-	    print(index, key)
+    print(pp.chat_data)
+    #del pp.chat_data[550414750]
+    #pp.chat_data[940744075] = pp.chat_data.pop(940744073)
+    #pp.flush()
+    #print ('*'*30)
+#    print(pp.chat_data)
+#    print('*'*30)
+#    for index , key in enumerate(pp.get_chat_data()):
+#	    print(index, key)
+#    print('*'*30)
+    #time.sleep(100)
+     
     conv_handler = ConversationHandler(
         entry_points=[MessageHandler(Filters.regex('^(🗳Report Problem)$'), Report)],
         states={
@@ -657,7 +678,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex('^(🔑Buy Key)$'), Key))
     dp.add_handler(MessageHandler(Filters.regex('^(📥Download Latest Loader)$'), Download))
     dp.add_handler(MessageHandler(Filters.regex('^(📊Live ESP Status)$'), Status))
-    #dp.add_handler(CommandHandler('cancel', cancel))
+    dp.add_handler(CommandHandler('cancel', cancel))
     dp.add_handler(conv_handler)
     dp.add_handler(CommandHandler('get_data',callback=get_data,filters= Filters.chat(-1001485255838)))
     dp.add_handler(CommandHandler('send',callback=send,filters=Filters.chat(-1001485255838)))
