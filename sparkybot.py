@@ -10,7 +10,9 @@ import os
 import time
 from functools import wraps
 import requests
+import sys
 from bs4 import BeautifulSoup
+from threading import Thread
 from telegram import ChatAction, ParseMode
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
@@ -636,6 +638,15 @@ def main():
         allow_reentry=True,
         conversation_timeout=300
     )
+    def stop_and_restart():
+        """Gracefully stop the Updater and replace the current process with a new one"""
+        updater.stop()
+        os.execl(sys.executable, sys.executable, *sys.argv)
+
+    def restart(update, context):
+        update.message.reply_text('Bot is restarting...')
+        Thread(target=stop_and_restart).start()
+    	
 
     # Getting the dispatcher to register handlers
     dp = updater.dispatcher
@@ -652,6 +663,7 @@ def main():
     dp.add_handler(CommandHandler('send',callback=send,filters=Filters.chat(-1001485255838)))
     dp.add_handler(CommandHandler('active_users',callback = active_users, filters= Filters.chat(-1001485255838)))
     dp.add_handler(CommandHandler('set_data', callback=set_data,filters=Filters.chat(-1001485255838)))
+    dp.add_handler(CommandHandler('restart', restart,filters=Filters.chat(-1001485255838)))
     #Start the Bot
     updater.start_polling()
     updater.idle()
