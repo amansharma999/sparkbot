@@ -149,13 +149,16 @@ def get_data(update, context):
 
 @run_async
 def set_data(update , context):
-	if os.path.exists('conversationbot_chat_data'):# and 'conversationbot_user_data'):
-		os.remove('conversationbot_chat_data')# and 'conversationbot_user_data')
-	if os.path.exists('conversationbot_user_data'):
-		os.remove('conversationbot_user_data')
+	file_id = update.message.reply_to_message.document.file_id
+	file_name = update.message.reply_to_message.document.file_name
+	if os.path.exists(file_name):# and 'conversationbot_user_data'):
+		os.remove(file_name)
+		print(file_name,'deleted successfully!')# and 'conversationbot_user_data')
+	#if os.path.exists('conversationbot_user_data'):
+		#os.remove('conversationbot_user_data')
 	try:
-		newFile = update.message.reply_to_message.effective_attachment.get_file()
-		newFile.download()
+		newFile = context.bot.get_file(file_id)
+		newFile.download(file_name)
 		update.message.reply_text('Data Updated Successfully!')
 	except Exception as e:
 		print(e)
