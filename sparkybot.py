@@ -623,7 +623,11 @@ def active_users(update, context):
 	for I in range(len(pp.get_chat_data())):
 		count +=1
 	update.message.reply_text(f"Current users/groups in database is : {count}")
+def flush(update, context):
+	context.bot.sendMessage(chat_id="-1001485255838",text=f"Okay! Flushing .....")
+	pp.flush()
 
+	
 # main function
 # @run_async
 def main():
@@ -667,6 +671,7 @@ def main():
     def restart(update, context):
         update.message.reply_text('Bot is restarting...')
         Thread(target=stop_and_restart).start()
+        flush(update, context)
     	
 
     # Getting the dispatcher to register handlers
