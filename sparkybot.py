@@ -43,8 +43,8 @@ url2 = 'https://sparkcheats.tech/download'
 apk_name = 'SparkLoader'
 
 ext = '.apk'
-
-TOKEN = "1129141206:AAE64a9Msk0lKoDG3qSUcpckOzpMx8F7SN4"
+TOKEN = os.environ.get("TOKEN"," ")
+#TOKEN = "1129141206:AAE64a9Msk0lKoDG3qSUcpckOzpMx8F7SN4"
 
 # keyboard
 reply_keyboard = [['🔑Buy Key', '📥Download Latest Loader '], ['📊Live ESP Status', '🗳Report Problem']]
